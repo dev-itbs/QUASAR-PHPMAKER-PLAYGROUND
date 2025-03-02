@@ -3,7 +3,7 @@
 
 import { defineConfig } from '#q-app/wrappers';
 
-export default defineConfig((/* ctx */) => {
+export default defineConfig(( ctx ) => {
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
@@ -55,7 +55,10 @@ export default defineConfig((/* ctx */) => {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
+      env: {
+        VITE_API_URL: ctx.dev ? '' : 'https://your-live-server.com',
+        ENCRYPTION_KEY: '', //encryption for indexed db
+      },
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
@@ -64,7 +67,7 @@ export default defineConfig((/* ctx */) => {
 
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
-      
+
       // vitePlugins: [
       //   [ 'package-name', { ..pluginOptions.. }, { server: true, client: true } ]
       // ]
@@ -72,8 +75,26 @@ export default defineConfig((/* ctx */) => {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver
     devServer: {
-      // https: true,
-      open: true // opens browser window automatically
+      port: 9000,
+      proxy: {
+        // User Access Control application
+        '/UAC': {
+          target: 'http://dict-kiosk.local',
+          changeOrigin: true,
+          secure: false,
+          pathRewrite: {
+            '^/UAC': '/UAC', // keep the /UAC prefix when forwarding
+          },
+        },
+        '/KIOSK': {
+          target: 'http://dict-kiosk.local',
+          changeOrigin: true,
+          secure: false,
+          pathRewrite: {
+            '^/KIOSK': '/KIOSK', // keep the /UAC prefix when forwarding
+          },
+        },
+      },
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
@@ -91,7 +112,10 @@ export default defineConfig((/* ctx */) => {
       // directives: [],
 
       // Quasar plugins
-      plugins: []
+      plugins: [
+        'Dialog',
+        'Notify' // Make sure this is included
+      ],
     },
 
     // animations: 'all', // --- includes all animations
